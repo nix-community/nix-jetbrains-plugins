@@ -28,6 +28,8 @@ use version_compare::Version;
 use which::which;
 
 const ALL_PLUGINS_JSON: &str = "all_plugins.json";
+const PLUGIN_LIST_URL: &str = "https://plugins.jetbrains.com/plugins/list";
+const PLUGIN_DOWNLOAD_URL: &str = "https://plugins.jetbrains.com/plugin/download";
 
 lazy_static! {
     static ref NIX_PREFETCH_URL: PathBuf =
@@ -277,10 +279,8 @@ async fn process_plugin(
     };
 
     let req = client
-        .get(format!(
-            "https://plugins.jetbrains.com/plugins/list?pluginId={}",
-            pluginkey_for_details
-        ))
+        .get(PLUGIN_LIST_URL)
+        .query(&[("pluginId", pluginkey_for_details)])
         .send()
         .await?;
     if !req.status().is_success() {
@@ -397,10 +397,8 @@ async fn get_db_entry<'a>(
     );
 
     let req = client
-        .head(format!(
-            "https://plugins.jetbrains.com/plugin/download?pluginId={}&version={}",
-            pluginkey, version
-        ))
+        .head(PLUGIN_DOWNLOAD_URL)
+        .query(&[("pluginId", pluginkey), ("version", version)])
         .send()
         .await?;
 
