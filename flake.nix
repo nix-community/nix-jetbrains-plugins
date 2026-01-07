@@ -64,7 +64,10 @@
 
               A derivation wrapping `ide` along with the specified plugins.
             */
-            buildIdeWithPlugins = jetbrains: self.lib.buildIdeWithPlugins (pkgs // { inherit jetbrains; });
+            buildIdeWithPlugins =
+              nixpkgs.lib.warn
+                "nix-jetbrains-plugins: `lib.${system}.buildIdeWithPlugins` is deprecated. Please switch to `lib.buildIdeWithPlugins`."
+                (jetbrains: self.lib.buildIdeWithPlugins (pkgs // { inherit jetbrains; }));
           };
         }
       );
