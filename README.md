@@ -97,21 +97,49 @@ These functions are only compatible and tested with the latest stable nixpkgs ve
 ### `buildIdeWithPlugins`
 
 Using this function you can build an IDE using a set of named plugins from this Flake. The function
-will automatically figure out what IDE and version the plugin needs to be for.
+will automatically figure out which IDE and version the plugins need to be for.
 
 #### Arguments:
 
-1. `pkgs.jetbrains` from nixpkgs.
-2. The `pkgs.jetbrains` key of the IDE to build or download.
+1. An instance of `pkgs` from Nixpkgs.
+2. A Jetbrains IDE package or the `pkgs.jetbrains` key of the IDE to build or download.
 3. A list of plugin IDs to install.
 
 #### Example:
 
 ```nix
 {
-  environment.systemPackages = with nix-jetbrains-plugins.lib."${system}"; [
+  environment.systemPackages = with nix-jetbrains-plugins.lib; [
     # Adds the latest IDEA version with the latest compatible version of "com.intellij.plugins.watcher".
-    (buildIdeWithPlugins pkgs.jetbrains "idea" ["com.intellij.plugins.watcher"])
+    (buildIdeWithPlugins pkgs "idea" ["com.intellij.plugins.watcher"])
   ];
+}
+```
+
+### `pluginsForIde`
+
+Using this function you can collect a set of plugins from this Flake. The function will automatically
+figure out which IDE and version the plugins need to be for.
+
+#### Arguments:
+
+1. An instance of `pkgs` from Nixpkgs.
+2. A Jetbrains IDE package or the `pkgs.jetbrains` key of the IDE to build or download.
+3. A list of plugin IDs to resolve.
+
+#### Example:
+
+```nix
+{
+  environment.systemPackages =
+    let
+      inherit (pkgs.jetbrains) idea;
+      plugins = nix-jetbrains-plugins.lib.pluginsForIde pkgs idea [
+        "com.intellij.plugins.watcher"
+      ];
+    in
+    [
+      (pkgs.jetbrains.plugins.addPlugins idea (lib.attrValues plugins))
+    ];
 }
 ```
