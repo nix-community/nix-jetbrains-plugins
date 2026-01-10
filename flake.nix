@@ -1,8 +1,6 @@
 {
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-    flake-utils.inputs.systems.follows = "systems";
     systems.url = "github:nix-systems/default";
     flake-compat.url = "github:NixOS/flake-compat";
     flake-compat.flake = false;
@@ -13,29 +11,37 @@
       self,
       nixpkgs,
       systems,
-      flake-utils,
       ...
     }:
     let
-      perSystem = flake-utils.lib.eachSystem (import systems) (
-        system:
-        let
-          pkgs = import nixpkgs {
-            inherit system;
-          };
-        in
-        {
-          plugins = pkgs.callPackage ./plugins.nix { };
+      eachSystem = nixpkgs.lib.genAttrs (import systems);
+      eachSystemPkgs =
+        fn:
+        builtins.mapAttrs fn (
+          eachSystem (
+            system:
+            import nixpkgs {
+              inherit system;
+            }
+          )
+        );
+      eachPkgs = fn: eachSystemPkgs (_: fn);
+    in
+    {
+      plugins = eachPkgs (pkgs: pkgs.callPackage ./plugins.nix { });
 
-          packages = {
-            _nix-jebrains-plugins-generator = pkgs.callPackage ./generator/pkg.nix { };
-          };
+      packages = eachPkgs (pkgs: {
+        _nix-jebrains-plugins-generator = pkgs.callPackage ./generator/pkg.nix { };
+      });
 
-          devShells = {
-            default = pkgs.callPackage ./dev.nix { };
-          };
+      devShells = eachPkgs (pkgs: {
+        default = pkgs.callPackage ./dev.nix { };
+      });
 
-          lib = {
+      lib =
+        import ./lib.nix
+        // eachSystemPkgs (
+          system: pkgs: {
             /**
               Wraps a Jetbrains IDE with the specified plugins from this flake.
 
@@ -68,12 +74,7 @@
               nixpkgs.lib.warn
                 "nix-jetbrains-plugins: `lib.${system}.buildIdeWithPlugins` is deprecated. Please switch to `lib.buildIdeWithPlugins`."
                 (jetbrains: self.lib.buildIdeWithPlugins (pkgs // { inherit jetbrains; }));
-          };
-        }
-      );
-    in
-    perSystem
-    // {
-      lib = import ./lib.nix // perSystem.lib;
+          }
+        );
     };
 }
