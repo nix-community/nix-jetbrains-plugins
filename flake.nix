@@ -20,9 +20,9 @@
         builtins.mapAttrs fn (
           eachSystem (
             system:
-            import nixpkgs {
+            nixpkgs.legacyPackages.${system} or (import nixpkgs {
               inherit system;
-            }
+            })
           )
         );
       eachPkgs = fn: eachSystemPkgs (_: fn);
