@@ -66,7 +66,7 @@
             */
             buildIdeWithPlugins =
               nixpkgs.lib.warn
-                "nix-jetbrains-plugins: `lib.${system}.buildIdeWithPlugins` is deprecated. Please switch to `lib.buildIdeWithPlugins`."
+                "nix-jetbrains-plugins: `lib.${system}.buildIdeWithPlugins` is deprecated. Please switch to `lib.buildIdeWithPlugins`. Note the new function expects `pkgs` instead of `pkgs.jetbrains`."
                 (jetbrains: self.lib.buildIdeWithPlugins (pkgs // { inherit jetbrains; }));
           };
         }
