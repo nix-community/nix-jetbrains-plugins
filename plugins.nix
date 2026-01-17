@@ -2,6 +2,8 @@
   lib,
   fetchurl,
   fetchzip,
+  callPackage,
+  stdenv,
 }:
 with builtins;
 with lib;
@@ -52,6 +54,26 @@ let
     };
 
   allPlugins = fromJSON (readFile ./generated/all_plugins.json);
+  
+  specialPluginsInfo = callPackage ./specialPlugins.nix { };
+  mkPlugin =
+    downloadInfo:
+    if !specialPluginsInfo ? "${downloadInfo.name}" then
+      downloadPlugin downloadInfo
+    else
+      stdenv.mkDerivation (
+        {
+          pname = downloadInfo.name;
+          inherit (downloadInfo) version;
+          installPhase = ''
+            runHook preInstall
+            mkdir -p $out && cp -r . $out
+            runHook postInstall
+          '';
+          src = downloadPlugin downloadInfo;
+        }
+        // specialPluginsInfo."${downloadInfo.name}"
+      );
 
   pluginsGrouped = (
     groupBy' buildIdeVersionMap { } (x: x.ideName) (
@@ -64,7 +86,7 @@ let
         {
           ideName = concatStrings (intersperse "-" (init parts));
           version = elemAt parts ((length parts) - 1);
-          value = mapAttrs (k: v: downloadPlugin (findPlugin allPlugins k v)) (
+          value = mapAttrs (k: v: mkPlugin (findPlugin allPlugins k v)) (
             fromJSON (readFile (./generated/ides + "/${jsonFile}"))
           );
         }
