@@ -1,25 +1,14 @@
 {
   delve,
-  autoPatchelfHook,
   stdenv,
   lib,
   glibc,
   gcc-unwrapped,
 }:
-# This is a list of plugins that need special treatment. For example, the go plugin (id is 9568) comes with delve, a
+# This is a list of plugins that need special treatment. For example, the go plugin comes with delve, a
 # debugger, but that needs various linking fixes. The changes here replace it with the system one.
 {
-  "Pythonid" = {
-    # Python
-    nativeBuildInputs = lib.optional stdenv.hostPlatform.isLinux autoPatchelfHook;
-    buildInputs = [ (lib.getLib stdenv.cc.cc) ];
-  };
-  "PythonCore" = {
-    # Python community edition
-    nativeBuildInputs = lib.optional stdenv.hostPlatform.isLinux autoPatchelfHook;
-    buildInputs = [ (lib.getLib stdenv.cc.cc) ];
-  };
-  "org.jetbrains.plugins.go" = {
+  "org.jetbrains.plugins.go" = plugin: plugin.overrideAttrs (old: {
     buildInputs = [ delve ];
     buildPhase =
       let
@@ -32,8 +21,8 @@
         ln -sf ${delve}/bin/dlv lib/dlv/${arch}/dlv
         runHook postBuild
       '';
-  };
-  "com.github.copilot" = {
+  });
+  "com.github.copilot" = plugin: plugin.overrideAttrs (old: {
     # Modified version of https://github.com/ktor/nixos/commit/35f4071faab696b2a4d86643726c9dd3e4293964
     buildPhase = ''
       agent='copilot-agent/native/${lib.toLower stdenv.hostPlatform.uname.system}${
@@ -93,14 +82,5 @@
         sed -i -e "s/$before_prelude_position/$after_prelude_position/g" "$agent"
       fi
     '';
-  };
-  "com.jetbrains.rust" = {
-    nativeBuildInputs = lib.optional stdenv.hostPlatform.isLinux autoPatchelfHook;
-    buildInputs = [ (lib.getLib stdenv.cc.cc) ];
-    buildPhase = ''
-      runHook preBuild
-      chmod +x -R bin
-      runHook postBuild
-    '';
-  };
+  });
 }
