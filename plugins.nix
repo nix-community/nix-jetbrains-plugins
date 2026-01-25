@@ -4,6 +4,7 @@
   fetchzip,
   callPackage,
   stdenv,
+  autoPatchelfHook,
 }:
 with builtins;
 with lib;
@@ -55,25 +56,30 @@ let
 
   allPlugins = fromJSON (readFile ./generated/all_plugins.json);
   
-  specialPluginsInfo = callPackage ./specialPlugins.nix { };
-  mkPlugin =
-    downloadInfo:
-    if !specialPluginsInfo ? "${downloadInfo.name}" then
-      downloadPlugin downloadInfo
-    else
-      stdenv.mkDerivation (
-        {
-          pname = downloadInfo.name;
-          inherit (downloadInfo) version;
-          installPhase = ''
-            runHook preInstall
-            mkdir -p $out && cp -r . $out
-            runHook postInstall
-          '';
-          src = downloadPlugin downloadInfo;
-        }
-        // specialPluginsInfo."${downloadInfo.name}"
-      );
+  mkPlugin = {name, version, url, ...}@downloadInfo:
+    let
+      src = downloadPlugin downloadInfo;
+      isJar = hasSuffix ".jar" url;
+    in
+      if isJar 
+      then src
+      else stdenv.mkDerivation {
+        pname = name;
+        inherit version src;
+        nativeBuildInputs = lib.optional stdenv.hostPlatform.isLinux autoPatchelfHook;
+        buildInputs = [ (lib.getLib stdenv.cc.cc) ];
+        installPhase = ''
+          runHook preInstall
+          mkdir -p $out && cp -r . $out
+          runHook postInstall
+        '';
+        buildPhase = ''
+          runHook preBuild
+          # Make executables in the bin directory executable
+          [ -d bin ] && chmod +x -R bin
+          runHook postBuild
+        '';
+      };
 
   pluginsGrouped = (
     groupBy' buildIdeVersionMap { } (x: x.ideName) (
