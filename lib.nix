@@ -70,7 +70,7 @@ let
     A set of plugin derivations.
     Attribute names are the plugin IDs.
   */
-  buildPluginsForIdeWith = {
+  pluginsForIdeWith = {
     applyPluginOverrides ? true,
     dontOverride ? [],
     extraOverrides ? {},
@@ -82,14 +82,14 @@ let
       defaultOverrides = pkgs.callPackage ./overrides.nix { };
       
       # Warn if any ids in dontOverride do not exist in defaultOverrides
-      checkDontOverride = map (id: pkgs.lib.warnIfNot (defaultOverrides ? id) 
-        "Attribute ${id} listed in dontOverride does not exist in defaultOverrides");
+      checkDontOverride = map (id: pkgs.lib.warnIfNot (defaultOverrides ? ${id}) 
+        "Attribute ${id} listed in dontOverride does not exist in default overrides!" id);
       # Warn if any ids in extraOverrides do not exist in plugins
-      checkExtraOverridesNotExisting = builtins.mapAttrs (id: pkgs.lib.warnIfNot (plugins ? id)
-        "Attribute ${id} listed in extraOverrides does not exist in plugins");
+      checkExtraOverridesNotExisting = builtins.mapAttrs (id: pkgs.lib.warnIfNot (plugins ? ${id})
+        "Attribute ${id} listed in extraOverrides does not exist in plugins!");
       # Warn if any ids in extraOverrides also exist in dontOverride
-      checkExtraOverridesInconsistent = builtins.mapAttrs (id: pkgs.lib.warnIf (builtins.elem dontOverride id)
-        "Attribute ${id} listed in extraOverrides also exists in dontOverride, the override will be applied anyway");
+      checkExtraOverridesInconsistent = builtins.mapAttrs (id: pkgs.lib.warnIf (builtins.elem id dontOverride)
+        "Attribute ${id} listed in extraOverrides also exists in dontOverride, the override will be applied anyway.");
 
       enabledOverrides = removeAttrs defaultOverrides (checkDontOverride dontOverride);
       checkedExtraOverrides = pkgs.lib.pipe extraOverrides [
@@ -112,7 +112,7 @@ let
 
     Plugins are automatically resolved for the correct IDE, using the IDE's `pname` and `version`.
 
-    Default overrides are automatically applied, use `buildPluginsForIdeWith` for finegrained control.
+    Default overrides are automatically applied, use `pluginsForIdeWith` for finegrained control.
 
     # Type
     ```
@@ -136,7 +136,7 @@ let
     A set of plugin derivations.
     Attribute names are the plugin IDs.
   */
-  pluginsForIde = buildPluginsForIdeWith {};
+  pluginsForIde = pluginsForIdeWith {};
 
   /**
     Wraps a Jetbrains IDE with the specified plugins from this flake.
@@ -175,7 +175,7 @@ in
 {
   inherit
     pluginsForIde
+    pluginsForIdeWith
     buildIdeWithPlugins
-    buildPluginsForIdeWith
     ;
 }
