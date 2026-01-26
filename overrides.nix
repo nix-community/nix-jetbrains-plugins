@@ -21,6 +21,9 @@
         ln -sf ${delve}/bin/dlv lib/dlv/${arch}/dlv
         runHook postBuild
       '';
+    meta = {
+      maintainers = [ "SamueleFacenda" ];
+    };
   });
   "com.github.copilot" = plugin: plugin.overrideAttrs (old: {
     # Modified version of https://github.com/ktor/nixos/commit/35f4071faab696b2a4d86643726c9dd3e4293964
@@ -82,5 +85,8 @@
         sed -i -e "s/$before_prelude_position/$after_prelude_position/g" "$agent"
       fi
     '';
+    meta = {
+      maintainers = [ "SamueleFacenda" ];
+    };
   });
 }

@@ -2,7 +2,6 @@
   lib,
   fetchurl,
   fetchzip,
-  callPackage,
   stdenv,
   autoPatchelfHook,
 }:
