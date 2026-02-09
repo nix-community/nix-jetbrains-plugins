@@ -29,7 +29,7 @@ mkShell {
   '';
   # Add precompiled library to rustc search path
   RUSTFLAGS = (
-    builtins.map (a: ''-L ${a}/lib'') [
+    builtins.map (a: "-L ${a}/lib") [
       # add libraries here (e.g. pkgs.libvmi)
     ]
   );

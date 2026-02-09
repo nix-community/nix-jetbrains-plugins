@@ -54,15 +54,22 @@ let
     };
 
   allPlugins = fromJSON (readFile ./generated/all_plugins.json);
-  
-  mkPlugin = {name, version, url, ...}@downloadInfo:
+
+  mkPlugin =
+    {
+      name,
+      version,
+      url,
+      ...
+    }@downloadInfo:
     let
       src = downloadPlugin downloadInfo;
       isJar = hasSuffix ".jar" url;
     in
-      if isJar 
-      then src
-      else stdenv.mkDerivation {
+    if isJar then
+      src
+    else
+      stdenv.mkDerivation {
         pname = name;
         inherit version src;
         nativeBuildInputs = lib.optionals stdenv.hostPlatform.isLinux [ autoPatchelfHook ];

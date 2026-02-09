@@ -34,7 +34,7 @@ let
 
   /**
     Collect plugins for a specific Jetbrains IDE, applying the provided overrides configuration.
-    
+
     Works the same as `pluginsForIde`, but with more control over overrides.
 
     # Type
@@ -72,26 +72,38 @@ let
     A set of plugin derivations.
     Attribute names are the plugin IDs.
   */
-  pluginsForIdeWith = {
-    applyPluginOverrides ? true,
-    dontOverride ? [],
-    extraOverrides ? {},
-  } : pkgs: ide:
+  pluginsForIdeWith =
+    {
+      applyPluginOverrides ? true,
+      dontOverride ? [ ],
+      extraOverrides ? { },
+    }:
+    pkgs: ide:
     let
       package = resolveIdePackage pkgs ide;
       plugins = (pkgs.callPackage ./plugins.nix { }).${package.pname}.${package.version};
-      
+
       defaultOverrides = pkgs.callPackage ./overrides.nix { };
-      
+
       # Warn if any ids in dontOverride do not exist in defaultOverrides
-      checkDontOverride = map (id: pkgs.lib.warnIfNot (defaultOverrides ? ${id}) 
-        "Attribute ${id} listed in dontOverride does not exist in default overrides!" id);
+      checkDontOverride = map (
+        id:
+        pkgs.lib.warnIfNot (
+          defaultOverrides ? ${id}
+        ) "Attribute ${id} listed in dontOverride does not exist in default overrides!" id
+      );
       # Warn if any ids in extraOverrides do not exist in plugins
-      checkExtraOverridesNotExisting = builtins.mapAttrs (id: pkgs.lib.warnIfNot (plugins ? ${id})
-        "Attribute ${id} listed in extraOverrides does not exist in plugins!");
+      checkExtraOverridesNotExisting = builtins.mapAttrs (
+        id:
+        pkgs.lib.warnIfNot (
+          plugins ? ${id}
+        ) "Attribute ${id} listed in extraOverrides does not exist in plugins!"
+      );
       # Warn if any ids in extraOverrides also exist in dontOverride
-      checkExtraOverridesInconsistent = builtins.mapAttrs (id: pkgs.lib.warnIf (builtins.elem id dontOverride)
-        "Attribute ${id} listed in extraOverrides also exists in dontOverride, the override will be applied anyway.");
+      checkExtraOverridesInconsistent = builtins.mapAttrs (
+        id:
+        pkgs.lib.warnIf (builtins.elem id dontOverride) "Attribute ${id} listed in extraOverrides also exists in dontOverride, the override will be applied anyway."
+      );
 
       enabledOverrides = removeAttrs defaultOverrides (checkDontOverride dontOverride);
       checkedExtraOverrides = pkgs.lib.pipe extraOverrides [
@@ -101,10 +113,12 @@ let
       mergedOverrides = enabledOverrides // checkedExtraOverrides; # simple overwrite
       finalOverrides = if applyPluginOverrides then mergedOverrides else { };
 
-      getPlugin = id: let
-        basePlugin = plugins.${id};
-        override = finalOverrides.${id} or pkgs.lib.id;
-      in
+      getPlugin =
+        id:
+        let
+          basePlugin = plugins.${id};
+          override = finalOverrides.${id} or pkgs.lib.id;
+        in
         override basePlugin;
     in
     genAttrs getPlugin;
@@ -138,7 +152,7 @@ let
     A set of plugin derivations.
     Attribute names are the plugin IDs.
   */
-  pluginsForIde = pluginsForIdeWith {};
+  pluginsForIde = pluginsForIdeWith { };
 
   /**
     Wraps a Jetbrains IDE with the specified plugins from this flake.
