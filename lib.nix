@@ -39,20 +39,22 @@ let
 
     # Type
     ```
-    pluginsForIde :: { applyPluginOverrides :: Bool , dontOverride :: [ String ], extraOverrides :: AttrSet of (Derivation -> Derivation)} -> (Nixpkgs instance) -> (String | Derivation) -> [String] -> AttrSet
+    pluginsForIde :: AttrSet -> (Nixpkgs instance) -> (String | Derivation) -> [String] -> AttrSet
     ```
 
     # Inputs
-    `applyPluginOverrides` (Bool)
-    : Wherether to apply the default plugin overrides.
-      Set to false to disable all overrides (even those in `extraOverrides`).
+    `settings` (AttrSet)
 
-    `dontOverride` (List of String)
-    : A list of plugin IDs to not apply the default overrides to.
+    : `applyPluginOverrides` (Bool)
+      : Wherether to apply the default plugin overrides.
+        Set to false to disable all overrides (even those in `extraOverrides`).
 
-    `extraOverrides` (AttrSet of (Derivation -> Derivation))
-    : A set of additional overrides to apply on top of the default overrides.
-      The items must be function that take a plugin derivation and return a modified derivation.
+      `dontOverride` (List of String)
+      : A list of plugin IDs to not apply the default overrides to.
+
+      `extraOverrides` (AttrSet of (Derivation -> Derivation))
+      : A set of additional overrides to apply on top of the default overrides.
+        The items must be function that take a plugin derivation and return a modified derivation.
 
     `pkgs` (Nixpkgs instance)
     : The package set used for resolving `ide` and building plugins.
