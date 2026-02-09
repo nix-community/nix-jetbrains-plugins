@@ -25,8 +25,6 @@
         '';
       meta = {
         maintainers = [ "SamueleFacenda" ];
-        minVersionTested = "252.27397.103";
-        maxVersionTested = "252.27397.103";
       };
     });
   "com.github.copilot" =
@@ -51,8 +49,6 @@
       '';
       meta = {
         maintainers = [ "SamueleFacenda" ];
-        minVersionTested = "1.5.63-243";
-        maxVersionTested = "1.5.63-243";
       };
     });
 }
