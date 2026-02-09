@@ -65,18 +65,19 @@ let
       else stdenv.mkDerivation {
         pname = name;
         inherit version src;
-        nativeBuildInputs = lib.optional stdenv.hostPlatform.isLinux autoPatchelfHook;
+        nativeBuildInputs = lib.optionals stdenv.hostPlatform.isLinux [ autoPatchelfHook ];
         buildInputs = [ (lib.getLib stdenv.cc.cc) ];
+        buildPhase = ''
+          runHook preBuild
+          if [ -d bin ]; then
+            chmod +x -R bin
+          fi
+          runHook postBuild
+        '';
         installPhase = ''
           runHook preInstall
           mkdir -p $out && cp -r . $out
           runHook postInstall
-        '';
-        buildPhase = ''
-          runHook preBuild
-          # Make executables in the bin directory executable
-          [ -d bin ] && chmod +x -R bin
-          runHook postBuild
         '';
       };
 
