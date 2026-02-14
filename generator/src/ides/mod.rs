@@ -1,7 +1,7 @@
 mod android_studio;
 mod jetbrains;
 
-const PROCESSED_VERSION_PREFIXES: &[&str] = &["2027.", "2026."];
+const PROCESSED_VERSION_PREFIXES: &[&str] = &["2027.", "2026.", "2025.3."];
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 pub enum IdeProduct {
