@@ -1,5 +1,5 @@
 use crate::ides::{IdeProduct, IdeVersion, allowed_build_version};
-use log::warn;
+use log::{debug, warn};
 use serde::Deserialize;
 use std::collections::HashSet;
 
@@ -50,6 +50,7 @@ pub async fn collect_ids() -> anyhow::Result<Vec<IdeVersion>> {
                     if channel.id.ends_with("RELEASE-licensing-RELEASE") {
                         for build in &channel.build {
                             if allowed_build_version(&build.version) {
+                                debug!("Using IDE {} {}", ideobj.nix_key(), build.version);
                                 versions.push(IdeVersion {
                                     ide: ideobj,
                                     version: build.version.clone(),

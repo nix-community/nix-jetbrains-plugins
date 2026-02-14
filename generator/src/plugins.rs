@@ -296,7 +296,7 @@ async fn process_plugin(
         Err(error) => {
             let empty_response: Result<(), _> = serde_xml_rs::from_str(&request_text);
             return if empty_response.is_ok() {
-                warn!("{pluginkey}: No plugin details available. Skipping!");
+                warn!("{pluginkey}: No plugin details available. Skipping! (A)");
                 Ok(())
             } else {
                 Err(error.into())
@@ -315,7 +315,7 @@ async fn process_plugin(
                 break 'a candidate;
             }
         }
-        warn!("{pluginkey}: No plugin details available. Skipping!");
+        warn!("{pluginkey}: No plugin details available. Skipping! (B)");
         return Ok(());
     };
 
@@ -334,16 +334,21 @@ async fn process_plugin(
         match supported_version(ide, &versions) {
             None => debug!("{pluginkey}: IDE {ide:?} not supported."),
             Some(version) => {
+                debug!("{pluginkey}: Processing for supported IDE {ide:?}");
                 let entry =
                     get_db_entry(&client, pluginkey, &version.version, &db, &fof_cache).await?;
                 if let Some(entry) = entry {
+                    debug!("{pluginkey}: updating DB entry");
                     let mut lck = db.write().await;
                     let db_mut = &mut *lck;
                     db_mut.insert(ide, pluginkey, &version.version, &entry);
+                } else {
+                    debug!("{pluginkey}: No DB entry");
                 }
             }
         }
     }
+    debug!("{pluginkey}: done.");
     Ok(())
 }
 
