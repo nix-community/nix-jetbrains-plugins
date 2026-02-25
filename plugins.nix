@@ -2,6 +2,8 @@
   lib,
   fetchurl,
   fetchzip,
+  stdenv,
+  autoPatchelfHook,
 }:
 with builtins;
 with lib;
@@ -53,6 +55,39 @@ let
 
   allPlugins = fromJSON (readFile ./generated/all_plugins.json);
 
+  mkPlugin =
+    {
+      name,
+      version,
+      url,
+      ...
+    }@downloadInfo:
+    let
+      src = downloadPlugin downloadInfo;
+      isJar = hasSuffix ".jar" url;
+    in
+    if isJar then
+      src
+    else
+      stdenv.mkDerivation {
+        pname = name;
+        inherit version src;
+        nativeBuildInputs = lib.optionals stdenv.hostPlatform.isLinux [ autoPatchelfHook ];
+        buildInputs = [ (lib.getLib stdenv.cc.cc) ];
+        buildPhase = ''
+          runHook preBuild
+          if [ -d bin ]; then
+            chmod +x -R bin
+          fi
+          runHook postBuild
+        '';
+        installPhase = ''
+          runHook preInstall
+          mkdir -p $out && cp -r . $out
+          runHook postInstall
+        '';
+      };
+
   pluginsGrouped = (
     groupBy' buildIdeVersionMap { } (x: x.ideName) (
       map (
@@ -64,7 +99,7 @@ let
         {
           ideName = concatStrings (intersperse "-" (init parts));
           version = elemAt parts ((length parts) - 1);
-          value = mapAttrs (k: v: downloadPlugin (findPlugin allPlugins k v)) (
+          value = mapAttrs (k: v: mkPlugin (findPlugin allPlugins k v)) (
             fromJSON (readFile (./generated/ides + "/${jsonFile}"))
           );
         }

@@ -143,3 +143,46 @@ figure out which IDE and version the plugins need to be for.
     ];
 }
 ```
+
+### `pluginsForIdeWith`
+
+Like `pluginsForIde`, but get's a first attribute set argument that allows to 
+configure the plugin overrides behaviours. By default some plugins (e.g. `github-copilot`)
+are patched, this behaviour can be controlled.
+
+#### Arguments
+
+1. An attribute set with signature `{ applyPluginOverrides :: Bool , dontOverride :: [ String ], extraOverrides :: AttrSet of (Derivation -> Derivation)}`, all the items are optionals.
+2. An instance of `pkgs` from Nixpkgs.
+3. A Jetbrains IDE package or the `pkgs.jetbrains` key of the IDE to build or download.
+4. A list of plugin IDs to resolve.
+
+#### Example:
+
+```nix
+{
+  environment.systemPackages =
+    let
+      inherit (pkgs.jetbrains) idea;
+      plugins = nix-jetbrains-plugins.lib.pluginsForIdeWith {
+          applyPluginOverrides = true;
+          dontOverride = [ "com.github.copilot" ];
+          extraOverrides = {
+            PythonCore = old: old.overrideAttrs (oldAttrs: {
+              src = pkgs.fetchurl { ... };
+            });
+          };
+        }
+        pkgs 
+        idea 
+        [
+          "com.intellij.plugins.watcher"
+          "com.github.copilot"
+          "PythonCore"
+        ];
+    in
+    [
+      (pkgs.jetbrains.plugins.addPlugins idea (lib.attrValues plugins))
+    ];
+}
+```
