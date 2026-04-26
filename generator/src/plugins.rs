@@ -252,8 +252,6 @@ pub async fn db_update(
 /// Various hacks to support (or skip) some very odd cases
 fn hacks_for_details_key(pluginkey: &str) -> Option<&str> {
     match pluginkey {
-        // The former is the real ID, but it trips up the plugin endpoint...
-        "23.bytecode-disassembler" => Some("bytecode-disassembler"),
         // Has invalid version numbers
         "com.valord577.mybatis-navigator" => None,
         // ZIP contains invalid file names
@@ -285,9 +283,10 @@ async fn process_plugin(
         .await?;
     if !req.status().is_success() {
         return Err(anyhow!(
-            "{} failed details request: {}",
+            "{} failed details request ({}): {}",
             pluginkey,
-            req.status()
+            req.url(),
+            req.status(),
         ));
     }
     let request_text = req.text().await?;
