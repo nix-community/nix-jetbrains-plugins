@@ -4,6 +4,15 @@
   stdenv,
   lib,
   makeBinaryWrapper,
+  autoPatchelfHook,
+  libX11,
+  libXtst,
+  glib,
+  pipewire,
+  libjpeg8,
+  libpng,
+  libei,
+  libsecret,
 }:
 # This is a list of plugins that need special treatment. For example, the go plugin comes with delve, a
 # debugger, but that needs various linking fixes. The changes here replace it with the system one.
@@ -33,7 +42,20 @@
       # This plugins ships with the language server in binary and js form.
       # The binary form (the default) is very difficult to patch (a patch existed but wasn't stable),
       # so instead we use the js form and wrap it in a binary wrapper that calls nodejs on it.
-      nativeBuildInputs = old.nativeBuildInputs or [ ] ++ [ makeBinaryWrapper ];
+      nativeBuildInputs = old.nativeBuildInputs or [ ] ++ [
+        makeBinaryWrapper
+        autoPatchelfHook
+      ];
+      buildInputs = old.buildInputs or [ ] ++ [
+        libX11
+        libXtst
+        libjpeg8
+        libpng
+        pipewire
+        glib
+        libei
+        libsecret
+      ];
       buildPhase = ''
         agent='copilot-agent/native/${lib.toLower stdenv.hostPlatform.uname.system}${
           {
