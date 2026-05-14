@@ -5,10 +5,12 @@ on:
     paths:
       - "**.nix"
       - flake.lock
+      - generated/*
   pull_request:
     paths:
       - "**.nix"
       - flake.lock
+      - generated/*
 name: "Plugin Overrides"
 
 jobs:
