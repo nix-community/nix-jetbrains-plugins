@@ -42,20 +42,22 @@
       # This plugins ships with the language server in binary and js form.
       # The binary form (the default) is very difficult to patch (a patch existed but wasn't stable),
       # so instead we use the js form and wrap it in a binary wrapper that calls nodejs on it.
-      nativeBuildInputs = old.nativeBuildInputs or [ ] ++ [
-        makeBinaryWrapper
-        autoPatchelfHook
-      ];
-      buildInputs = old.buildInputs or [ ] ++ [
-        libX11
-        libXtst
-        libjpeg8
-        libpng
-        pipewire
-        glib
-        libei
-        libsecret
-      ];
+      nativeBuildInputs =
+        old.nativeBuildInputs or []
+        ++ [makeBinaryWrapper]
+        ++ lib.optionals stdenv.hostPlatform.isLinux [autoPatchelfHook];
+      buildInputs =
+        old.buildInputs or []
+        ++ lib.optionals stdenv.hostPlatform.isLinux [
+          libX11
+          libXtst
+          libjpeg8
+          libpng
+          pipewire
+          glib
+          libei
+          libsecret
+        ];
       buildPhase = ''
         agent='copilot-agent/native/${lib.toLower stdenv.hostPlatform.uname.system}${
           {
