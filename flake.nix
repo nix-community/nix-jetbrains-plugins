@@ -28,6 +28,8 @@
       eachPkgs = fn: eachSystemPkgs (_: fn);
     in
     {
+      formatter = eachPkgs (pkgs: pkgs.nixfmt-tree);
+
       plugins = eachPkgs (pkgs: pkgs.callPackage ./plugins.nix { });
 
       packages = eachPkgs (pkgs: {
