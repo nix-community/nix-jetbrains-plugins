@@ -83,7 +83,7 @@ let
       package = resolveIdePackage pkgs ide;
       plugins = (pkgs.callPackage ./plugins.nix { }).${package.pname}.${package.version};
 
-      defaultOverrides = pkgs.callPackage ./overrides.nix { };
+      defaultOverrides = pkgs.callPackage ./overrides/default.nix { };
 
       # Warn if any ids in dontOverride do not exist in defaultOverrides
       checkDontOverride = map (
