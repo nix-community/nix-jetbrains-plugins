@@ -45,7 +45,7 @@ jobs:
         id: list
         run: |
           set -euo pipefail
-          dirs=$(git diff --name-only "${{ steps.base.outputs.base }}"...HEAD -- overrides/ \
+          dirs=$(git diff --name-only "$BASE"...HEAD -- overrides/ \
             | awk -F/ 'NF>=3 {print $2}' \
             | sort -u \
             | jq -R . | jq -sc .)
@@ -74,7 +74,12 @@ jobs:
           nix_path: nixpkgs=channel:nixos-unstable
 
       - name: Build '${{ matrix.dir }}'
+        env:
+          MATRIX_DIR: ${{ matrix.dir }}
         run: |
-          nix build \
-            --impure --expr \
-            '((builtins.getFlake (toString ./.)).lib.pluginsForIde (import <nixpkgs> {}) "idea" ["${{ matrix.dir }}"])."${{ matrix.dir }}"'
+          nix build --impure --expr '
+            let
+             dir = builtins.getEnv "MATRIX_DIR";
+            in
+            ((builtins.getFlake (toString ./.)).lib.pluginsForIde (import <nixpkgs> {}) "idea" [dir]).${dir}
+          '

@@ -2,8 +2,10 @@
   lib,
   callPackage,
 }:
-with builtins;
+let
+  inherit (builtins) mapAttrs readDir;
+in
 # map: <dirname> -> package in <dirname>/default.nix
-mapAttrs (n: _: callPackage (./. + "/${n}/default.nix") { }) (
+mapAttrs (pid: _: callPackage (./. + "/${pid}/default.nix") { }) (
   lib.filterAttrs (n: v: (v == "directory")) (readDir ./.)
 )
