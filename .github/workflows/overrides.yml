@@ -39,7 +39,7 @@ jobs:
               base="$before"
             fi
           fi
-          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "BASE=$base" >> "$GITHUB_ENV"
 
       - name: List changed override directories
         id: list
