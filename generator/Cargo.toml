@@ -9,9 +9,9 @@ diff = ["dep:gix", "dep:pathdiff", "dep:ansi_term"]
 
 [dependencies]
 anyhow = "1"
-tokio = { version = "1", features = ["full"] }
-tokio-stream = { version = "0.1", features = ["full"] }
-reqwest = { version = "0.13", features = ["json", "stream", "query"] }
+tokio = { version = "1", features = ["rt-multi-thread", "process", "macros"] }
+tokio-stream = { version = "0.1", features = ["fs"] }
+reqwest = { version = "0.13", default-features = false, features = ["json", "stream", "query", "native-tls"] }
 clap = { version = "4.6", features = ["derive"] }
 log = "0.4"
 log4rs = "1.4"
@@ -25,6 +25,6 @@ base64 = "0.22"
 version-compare = "0.2"
 lazy_static = "1.5"
 which = "8"
-gix = { version = "0.83", optional = true }
+gix = { version = "0.83", optional = true, default-features = false, features = ["basic", "sha1", "blocking-http-transport-reqwest"] }
 pathdiff = { version = "0.2", optional = true }
 ansi_term = { version = "0.12", optional = true }
