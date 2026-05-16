@@ -24,6 +24,11 @@ jobs:
         with:
           fetch-depth: 0  # need history for the diff
 
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
       - name: Resolve base ref
         id: base
         run: |
@@ -45,12 +50,26 @@ jobs:
         id: list
         run: |
           set -euo pipefail
-          dirs=$(git diff --name-only "$BASE"...HEAD -- overrides/ \
+          
+          allOverrides=$(find overrides/ -name "default.nix" \
             | awk -F/ 'NF>=3 {print $2}' \
-            | sort -u \
             | jq -R . | jq -sc .)
-          echo "dirs=$dirs" >> "$GITHUB_OUTPUT"
-          echo "Changed override dirs: $dirs"
+          echo "All overrides: $allOverrides"
+          
+          changedOverrides=$(git diff --name-only "$BASE"...HEAD -- overrides/ \
+            | awk -F/ 'NF>=3 {print $2}' \
+            | jq -R . | jq -cs .)
+          echo "Changed overrides: $changedOverrides"
+          
+          updatedPlugins=$(nix run '.#_nix-jebrains-plugins-generator' -- \
+            --output-path ./generated diff --names-json "$BASE" HEAD)
+          echo "Updated plugins: $updatedPlugins"
+          
+          allChanges=$(echo "$changedOverrides"$'\n'"$updatedPlugins" | jq -cs 'add' | jq -c '. |= unique')
+          echo "$allChanges"$'\n'"$allOverrides" > /tmp/test
+          allChangesFiltered=$(echo "$allChanges"$'\n'"$allOverrides" | jq -cs '.[0] - (.[0] - .[1])')
+          echo "dirs=$allChangesFiltered" >> "$GITHUB_OUTPUT"
+          echo "Override to check: $allChangesFiltered"
 
   build:
     needs: build-matrix
@@ -61,10 +80,10 @@ jobs:
       matrix:
         dir: ${{ fromJSON(needs.build-matrix.outputs.dirs) }}
         os:
-        - ubuntu-24.04
-        - ubuntu-24.04-arm
-        - macos-26-intel
-        - macos-26
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+          - macos-26-intel
+          - macos-26
     steps:
       - uses: actions/checkout@v6
 

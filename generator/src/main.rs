@@ -1,3 +1,5 @@
+#[cfg(feature = "diff")]
+mod diff;
 mod ides;
 mod logging;
 mod plugins;
@@ -21,6 +23,9 @@ enum Command {
     Generate,
     /// Remove all plugins from all_plugins.json that are no longer used in any IDE json file.
     Cleanup,
+    #[cfg(feature = "diff")]
+    /// Print a list of updated plugins between two git revisions
+    Diff(diff::DiffArgs),
 }
 
 const PLUGIN_INDICES: &[&str] = &[
@@ -37,6 +42,8 @@ async fn main() -> anyhow::Result<()> {
     match cli.command {
         Command::Generate => generate(cli).await,
         Command::Cleanup => cleanup(cli).await,
+        #[cfg(feature = "diff")]
+        Command::Diff(args) => diff::run(&cli.output_path, args).await,
     }
 }
 
