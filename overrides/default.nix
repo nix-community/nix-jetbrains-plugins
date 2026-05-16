@@ -2,10 +2,10 @@
   lib,
   callPackage,
 }:
-let
-  inherit (builtins) mapAttrs readDir;
-in
 # map: <dirname> -> package in <dirname>/default.nix
-mapAttrs (pid: _: callPackage (./. + "/${pid}/default.nix") { }) (
-  lib.filterAttrs (n: v: (v == "directory")) (readDir ./.)
-)
+lib.pipe ./. [
+  builtins.readDir
+  (lib.mapAttrs (pid: _: ./. + "/${pid}/default.nix"))
+  (lib.filterAttrs (_: lib.pathExists))
+  (lib.mapAttrs (_: file: callPackage file { }))
+]
