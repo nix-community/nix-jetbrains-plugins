@@ -5,10 +5,6 @@ on:
   schedule:
     - cron: "0 3 * * 6"
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   generate:
     name: Generate plugin list
@@ -33,3 +29,8 @@ jobs:
           commit-message: Plugin Updates
           branch: plugin-updates
           delete-branch: true
+          push-to-fork: nix-jetbrains-updater/nix-jetbrains-plugins
+          # we use a custom token to trigger actions on the PR
+          # see: https://github.com/peter-evans/create-pull-request/blob/main/docs/concepts-guidelines.md#triggering-further-workflow-runs
+          # token user: nix-jetbrains-updater
+          token: "${{ secrets.PR_TOKEN   }}"
