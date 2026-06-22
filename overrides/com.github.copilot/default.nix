@@ -46,6 +46,9 @@ origPlugin.overrideAttrs (old: {
     rm -rf $agent
     makeBinaryWrapper ${lib.getExe nodejs} $agent \
       --add-flags "$out/copilot-agent/dist/language-server.js"
+
+    # unused binaries
+    rm copilot-agent/dist/node_modules/@github/copilot/sdk/prebuilds/linuxmusl-*/keytar.node
   '';
   meta = {
     maintainers = [ "SamueleFacenda" ];
