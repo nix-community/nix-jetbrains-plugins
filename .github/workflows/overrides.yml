@@ -20,7 +20,7 @@ jobs:
     outputs:
       dirs: ${{ steps.list.outputs.dirs }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0  # need history for the diff
 
@@ -85,7 +85,7 @@ jobs:
           - macos-26-intel
           - macos-26
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install Nix
         uses: cachix/install-nix-action@v31
