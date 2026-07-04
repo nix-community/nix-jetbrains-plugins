@@ -258,6 +258,8 @@ fn hacks_for_details_key(pluginkey: &str) -> Option<&str> {
         "io.github.kings1990.FastRequest" => None,
         // ZIP contains invalid file names
         "com.majera.intellij.codereview.gitlab" => None,
+        // ZIP contains invalid file names
+        "com.ollamapilot" => None,
         v => Some(v),
     }
 }
