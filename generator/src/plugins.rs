@@ -254,12 +254,11 @@ fn hacks_for_details_key(pluginkey: &str) -> Option<&str> {
     match pluginkey {
         // Has invalid version numbers
         "com.valord577.mybatis-navigator" => None,
-        // ZIP contains invalid file names
+        // for all of these: ZIP contains invalid file names
         "io.github.kings1990.FastRequest" => None,
-        // ZIP contains invalid file names
         "com.majera.intellij.codereview.gitlab" => None,
-        // ZIP contains invalid file names
         "com.ollamapilot" => None,
+        "com.qiansitu" => None,
         v => Some(v),
     }
 }
