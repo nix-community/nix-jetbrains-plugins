@@ -259,6 +259,7 @@ fn hacks_for_details_key(pluginkey: &str) -> Option<&str> {
         "com.majera.intellij.codereview.gitlab" => None,
         "com.ollamapilot" => None,
         "com.qiansitu" => None,
+        "de.amekudzi.microgulp" => None,
         v => Some(v),
     }
 }
