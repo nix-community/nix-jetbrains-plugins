@@ -111,7 +111,8 @@ pluginsGrouped
 // {
   # The new name of the `idea` package since 26.11
   intellij-idea = pluginsGrouped.idea;
-  # Add aliases for -oss and the deprecated -community and -ultimate
+  intellij-idea-oss = pluginsGrouped.idea;
+  # Aliases for -oss and the deprecated -community and -ultimate
   idea-community = pluginsGrouped.idea;
   idea-ultimate = pluginsGrouped.idea;
   idea-oss = pluginsGrouped.idea;
