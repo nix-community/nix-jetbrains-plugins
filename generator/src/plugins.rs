@@ -4,7 +4,6 @@ use base64::Engine;
 use base64::prelude::BASE64_STANDARD;
 use futures::stream::iter;
 use futures::{StreamExt, TryStreamExt};
-use lazy_static::lazy_static;
 use log::{debug, info, warn};
 use reqwest::{Client, StatusCode};
 use serde::{Deserialize, Serialize};
@@ -15,7 +14,7 @@ use std::future;
 use std::mem::take;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
-use std::sync::Arc;
+use std::sync::{Arc, LazyLock};
 use std::time::Duration;
 use tokio::fs::{read_dir, read_to_string, write};
 use tokio::process::Command;
@@ -31,11 +30,10 @@ const ALL_PLUGINS_JSON: &str = "all_plugins.json";
 const PLUGIN_LIST_URL: &str = "https://plugins.jetbrains.com/plugins/list";
 const PLUGIN_DOWNLOAD_URL: &str = "https://plugins.jetbrains.com/plugin/download";
 
-lazy_static! {
-    static ref NIX_PREFETCH_URL: PathBuf =
-        which("nix-prefetch-url").expect("nix-prefetch-url not in PATH");
-    static ref NIX_STORE: PathBuf = which("nix-store").expect("nix-store not in PATH");
-}
+static NIX_PREFETCH_URL: LazyLock<PathBuf> =
+    LazyLock::new(|| which("nix-prefetch-url").expect("nix-prefetch-url not in PATH"));
+static NIX_STORE: LazyLock<PathBuf> =
+    LazyLock::new(|| which("nix-store").expect("nix-store not in PATH"));
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialOrd, PartialEq, Ord, Eq, Hash)]
 pub struct PluginVersion(String);
