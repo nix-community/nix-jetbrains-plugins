@@ -24,6 +24,6 @@ nix-base32 = "0.2"
 base64 = "0.23"
 version-compare = "0.2"
 which = "8"
-gix = { version = "0.87", optional = true, default-features = false, features = ["basic", "sha1", "blocking-http-transport-reqwest"] }
+gix = { version = "0.89", optional = true, default-features = false, features = ["basic", "sha1", "blocking-http-transport-reqwest"] }
 pathdiff = { version = "0.2", optional = true }
 ansi_term = { version = "0.12", optional = true }

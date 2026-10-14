@@ -2,6 +2,7 @@ use ansi_term::{Color, Style};
 use anyhow::{Context, anyhow};
 use clap::Args;
 use gix::bstr::ByteSlice;
+use gix::error::ResultExt;
 use gix::object::tree::diff::Change;
 use pathdiff::diff_paths;
 use std::collections::{BTreeMap, HashMap};
@@ -81,7 +82,7 @@ pub async fn run(plugins_path: &Path, args: DiffArgs) -> anyhow::Result<()> {
                     }
                 };
             }
-            Ok::<_, anyhow::Error>(ControlFlow::Continue(()))
+            Ok::<_, gix::Error>(ControlFlow::Continue(()))
         })?;
 
     if args.names_json {
@@ -96,10 +97,11 @@ fn process_ide_file(
     ide_file_before: &[u8],
     ide_file_after: &[u8],
     ide_name: &str,
-) -> anyhow::Result<()> {
-    let plugins_versions_before: HashMap<String, String> =
-        serde_json::from_reader(ide_file_before)?;
-    let plugins_versions_after: HashMap<String, String> = serde_json::from_slice(ide_file_after)?;
+) -> gix::Result<()> {
+    let plugins_versions_before: HashMap<String, String> = serde_json::from_reader(ide_file_before)
+        .or_raise(|| gix::error::message("could not parse 'before' plugin versions"))?;
+    let plugins_versions_after: HashMap<String, String> = serde_json::from_slice(ide_file_after)
+        .or_raise(|| gix::error::message("could not parse 'after' plugin versions"))?;
 
     for (plugin_name, old_v, new_v) in diff_maps(&plugins_versions_before, &plugins_versions_after)
     {
